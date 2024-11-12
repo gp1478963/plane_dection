@@ -51,7 +51,7 @@ class MultilayerPerceptron(nn.Module):
         self.layers = nn.Sequential()
         self.activation = nn.ReLU() if activation is None else activation
         for index in range(len(self.feature)-1):
-            self.layers.append(nn.Linear(self.layers[index], self.feature[index+1]))
+            self.layers.append(nn.Linear(self.feature[index], self.feature[index+1]))
             self.layers.append(self.activation)
             self.layers.append(nn.Dropout(drop_rate))
 
@@ -63,7 +63,7 @@ class EncoderBlock(nn.Module):
     def __init__(self, dimension=768, heads=8, drop_rate=0.2, activation=None):
         super(EncoderBlock, self).__init__()
         self.attention = MultiHeadAttention(dimension=dimension, heads=heads)
-        self.MLP = MultilayerPerceptron(drop_rate=drop_rate, feature=dimension, activation=activation)
+        self.MLP = MultilayerPerceptron(drop_rate=drop_rate, feature=[dimension, dimension, dimension], activation=activation)
         self.norm1 = nn.LayerNorm(dimension)
         self.norm2 = nn.LayerNorm(dimension)
 

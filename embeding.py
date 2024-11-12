@@ -28,8 +28,8 @@ class InputEmbedding(nn.Module):
         self.patch_size = patch_size
         self.patch_count_one_side = image_size//patch_size
         self.patch_embedding = nn.Conv2d(in_channels=3, out_channels=embedding_size, kernel_size=self.patch_size, stride=self.patch_size)
-        self.cls_embedding = ClassEmbedding(embedding_size=self.embedding_size)
-        self.pos_embedding = PositionEmbedding(embedding_size=self.embedding_size, patch_count=self.patch_count_one_side*self.patch_count_one_side)
+        self.cls_embedding = ClassEmbedding(embedding_size=embedding_size)
+        self.pos_embedding = PositionEmbedding(embedding_size=embedding_size, patch_count=self.patch_count_one_side*self.patch_count_one_side)
 
     def forward(self, x):
         x = self.patch_embedding(x) # x.shape->(B,N,P,P)
