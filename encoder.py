@@ -68,14 +68,14 @@ class EncoderBlock(nn.Module):
         self.norm2 = nn.LayerNorm(dimension)
 
     def forward(self, x):
-        x = self.attention(x)
-        x = self.norm1(x)
-        x = self.MLP(x)
-        x = self.norm2(x)
-        return x
+        y = self.attention(x)
+        y = self.norm1(y) + x
+        y1 = self.MLP(y)
+        y1 = self.norm2(y1) + y
+        return y1
 
 class Decoder(nn.Module):
-    def __init__(self, dimension=768, layers=4):
+    def __init__(self, dimension=768, layers=8):
         super(Decoder, self).__init__()
         self.dimension = dimension
         self.layers = layers
