@@ -3,7 +3,6 @@ import cv2
 import torch
 import numpy as np
 import csv
-import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 
 PLANE_TYPE_ARRAY=[]
@@ -16,8 +15,8 @@ class PlaneDataset(Dataset):
         self.csv_path = csv_path
         self.images = []
         self.images_paths = []
-        self.labels = []
-        self.boxes = []
+        self.labels = {}
+        self.boxes = {}
         self.data_set_path = os.path.join(self.root_dir, 'dataset')
         crop_dir = os.path.join(root_dir, 'crop')
         self.PLANE_LABEL = os.listdir(crop_dir)
@@ -27,23 +26,25 @@ class PlaneDataset(Dataset):
         with open(self.csv_path, 'r') as f:
             sample_list = csv.reader(f)
             for row in sample_list:
-                self.images_paths.append(os.path.join(self.data_set_path, row[0]+'.jpg'))
-                self.labels.append(self.PLANE_LABEL.index(row[3]))
-                self.images = cv2.imread(os.path.join(self.data_set_path, row[0]+'.jpg'))
-                self.boxes.append(np.array([int(row[4]), int(row[5]), int(row[6]), int(row[7])]))
+                if row[0] not in self.images:
+                    self.images.append(row[0])
+                    self.images_paths.append(os.path.join(self.data_set_path, row[0]+'.jpg'))
+                    self.boxes[row[0]] = []
+                    self.labels[row[0]] = []
+                self.boxes[row[0]].append(np.array([int(row[4]), int(row[5]), int(row[6]), int(row[7]), self.PLANE_LABEL.index(row[3])]))
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
+        id = self.images[idx]
         image_path = self.images_paths[idx]
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        boxes = self.boxes[idx]
-        label = self.labels[idx]
+        boxes = np.array(self.boxes[id])
         if self.transform:
-            image, label, boxes = self.transform(image, label, boxes)
-        return image_path, image, label, boxes
+            image, boxes = self.transform(image, boxes)
+        return image_path, image, boxes
 
 def build_dataset(csv_path, root_dir, transform=None):
     train_csv = os.path.join(csv_path, 'train.csv')
@@ -73,6 +74,6 @@ def split_dataset(root_dir, split_rate=0.8, text_save_to=None):
 if __name__ == '__main__':
     # split_dataset(root_dir='D:\dataset\plane\dataset', split_rate=0.9, text_save_to='./dataset')
     train_dataset, test_dataset = build_dataset(csv_path='./dataset', root_dir='D:\dataset\plane', transform=None)
-    image_path, image, label, boxes = train_dataset.__getitem__(0)
-    print(image.shape)
+    image_path, image, boxes = train_dataset.__getitem__(2)
+    print(boxes)
 
