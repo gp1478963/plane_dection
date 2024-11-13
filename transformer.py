@@ -3,7 +3,7 @@ from embeding import InputEmbedding
 from torch import nn
 
 class TransformerEncoder(nn.Module):
-    def __init__(self, input_size=224, hidden_size= 786, num_layers=8, dimension=786, layer_count=8, patch_size=16):
+    def __init__(self, input_size=224, hidden_size= 768, num_layers=8, dimension=768, layer_count=8, patch_size=16):
         super(TransformerEncoder, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers

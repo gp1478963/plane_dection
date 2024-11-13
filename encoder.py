@@ -33,14 +33,14 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self, x):
         B, N, D = x.shape
-        x = x.transpose(1, 2)  # x.shape->(B,D,N)
+        # x = x.transpose(1, 2)  # x.shape->(B,D,N)
         qkv = self.extract_qkv(x)  # x.shape->(B,D*3,N)
-        qkv = qkv.reshape(B, 3, N, self.heads, D/self.heads).permute(1, 3, 0, 2, 4) # (3, H, B, N, D/H)
+        qkv = qkv.reshape(B, N, 3, self.heads, D//self.heads).permute(2, 3, 0, 1, 4) # (3, H, B, N, D/H)
         Q, K, V = qkv[0], qkv[1], qkv[2] # Q K V->(H, B, N, D/H)
         atte = Q@K.transpose(-2, -1) # Q->(H, B, N, D/H) @ K.T(H, B, D/H, N) = atte->(H, B, N, N)
         atte = self.softmax(atte*self.scale)
         x = atte@V # atte->(H, B, N, N)@V->(H, B, N, D/H) = x->(H, B, N, D/H)
-        x = x.reshape(B, N, D)
+        x = x.permute(2, 3, 0, 1).reshape(B, N, D)
         return x
 
 
